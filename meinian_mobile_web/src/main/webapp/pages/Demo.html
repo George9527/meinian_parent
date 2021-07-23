@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>正则表达式</title>
+</head>
+<body>
+
+</body>
+</html>
+<script>
+    <!-- 创建正则表达式对象 -->
+    <!-- /^1[3456789]d{9}$/ -->
+    <!-- /(^\d{18}$)|(^\d{17}(\d|X|x)$)/ -->
+    var reg=/^[1][0-9]{10}$/;
+    var tel = "12345678901";
+    var result = reg.test(tel);
+    console.log(result)
+
+    // var reg2 = new RegExp("(^\d{18}$)|(^\d{17}(\d|X|x)$)");
+    // var tel2 = "44111111111111111";
+    // var result2 = reg2.test(tel2);
+    // console.log(result2)
+
+
+</script>

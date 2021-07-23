@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.MemberDao">
+
+    <!-- 今天新增会员数 -->
+    <!-- int getTodayNewMember(String today); -->
+    <select id="getTodayNewMember" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM t_member WHERE regTime = #{date}
+    </select>
+
+    <!--  =========================================================================================  -->
+
+    <!-- 总会员数 -->
+    <!-- int getTotalMember() -->
+    <select id="getTotalMember" resultType="int" >
+        SELECT COUNT(*) FROM t_member
+    </select>
+
+    <!--  =========================================================================================  -->
+
+    <!-- 本月/本周新增会员数(>=本周的周一的日期) -->
+    <!-- int getThisWeekAndMonthNewMember(String weekMonday); -->
+    <select id="getThisWeekAndMonthNewMember" parameterType="string" resultType="int">
+        SELECT COUNT(id) FROM t_member WHERE regTime &gt;= #{date}
+    </select>
+
+    <!--  =========================================================================================  -->
+
+    <!-- 查询注册数 -->
+    <!-- Integer findMemberCount(String lastDayOfMonth); -->
+    <select id="findMemberCount" parameterType="string" resultType="int">
+        select count(id)
+        from t_member
+        where regTime &lt;= #{value}
+    </select>
+
+    <!--  =========================================================================================  -->
+
+    <!-- 新增会员 -->
+    <!-- void add(Member member); -->
+
+    <insert id="add" parameterType="member">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into
+        t_member
+        (fileNumber,name,sex,idCard,phoneNumber,
+        regTime,password,email,birthday,remark)
+        values
+        (#{fileNumber},#{name},#{sex},#{idCard},#{phoneNumber},
+        #{regTime},#{password},#{email},#{birthday},#{remark})
+    </insert>
+
+
+    <!--  =========================================================================================  -->
+
+    <!-- 根据用户手机号查找会员 -->
+    <!-- Member findByTelephone(String telephone); -->
+    <select id="findByTelephone" parameterType="string" resultType="member">
+        select *
+        from t_member
+        where phoneNumber =#{phoneNumber}
+    </select>
+
+</mapper>

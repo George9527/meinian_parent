@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>美年旅游</title>
+    <meta name="description" content="美年旅游">
+    <meta name="keywords" content="美年旅游">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>旅游管理<small>自由行管理</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>旅游管理</el-breadcrumb-item>
+            <el-breadcrumb-item>自由行管理</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <div class="filter-container">
+                <el-input placeholder="项目编码/项目名称" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>
+                <el-button @click="handleCurrentChange(1)" class="dalfBut">查询</el-button>
+                <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
+            </div>
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="code" label="项目编码" align="center"></el-table-column>
+                <el-table-column prop="name" label="项目名称" align="center"></el-table-column>
+                <el-table-column label="适用性别" align="center">
+                    <template slot-scope="scope">
+                        <span>{{ scope.row.sex == '0' ? '不限' : scope.row.sex == '1' ? '男' : '女'}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="age" label="适用年龄" align="center"></el-table-column>
+                <el-table-column prop="remark" label="项目说明" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="pagination-container">
+                <el-pagination
+                        class="pagiantion"
+                        @current-change="handleCurrentChange"
+                        :current-page="pagination.currentPage"
+                        :page-size="pagination.pageSize"
+                        layout="total, prev, pager, next, jumper"
+                        :total="pagination.total">
+                </el-pagination>
+            </div>
+            <!-- 新增标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="新增自由行" :visible.sync="dialogFormVisible">
+                    <el-form ref="dataAddForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="项目编码" prop="code">
+                                    <el-input v-model="formData.code"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="项目名称" prop="name">
+                                    <el-input v-model="formData.name"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="性别">
+                                    <el-select v-model="formData.sex">
+                                        <el-option label="不限" value="0"></el-option>
+                                        <el-option label="男" value="1"></el-option>
+                                        <el-option label="女" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="适用年龄">
+                                    <el-input v-model="formData.age"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="类型">
+                                    <el-select v-model="formData.type">
+                                        <el-option label="自己玩" value="1"></el-option>
+                                        <el-option label="一起玩" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="价格">
+                                    <el-input v-model="formData.price"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24">
+                                <el-form-item label="项目说明">
+                                    <el-input v-model="formData.remark" type="textarea"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24">
+                                <el-form-item label="注意事项">
+                                    <el-input v-model="formData.attention" type="textarea"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+<!--                        <el-button @click="dialogFormVisible = false">取消</el-button>-->
+                        <el-button @click="handleCancel()">取消</el-button>
+                        <el-button type="primary" @click="handleAdd()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+
+            <!-- 编辑标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="编辑自由行" :visible.sync="dialogFormVisible4Edit">
+                    <el-form ref="dataEditForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="项目编码" prop="code">
+                                    <el-input v-model="formData.code"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="项目名称" prop="name">
+                                    <el-input v-model="formData.name"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="性别">
+                                    <el-select v-model="formData.sex">
+                                        <el-option label="不限" value="0"></el-option>
+                                        <el-option label="男" value="1"></el-option>
+                                        <el-option label="女" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="适用年龄">
+                                    <el-input v-model="formData.age"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="类型">
+                                    <el-select v-model="formData.type">
+                                        <el-option label="自己玩" value="1"></el-option>
+                                        <el-option label="一起玩" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="价格">
+                                    <el-input v-model="formData.price"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24">
+                                <el-form-item label="项目说明">
+                                    <el-input v-model="formData.remark" type="textarea"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24">
+                                <el-form-item label="注意事项">
+                                    <el-input v-model="formData.attention" type="textarea"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+<!--                        <el-button @click="dialogFormVisible4Edit = false">取消</el-button>-->
+                        <el-button @click="handleCancel()">取消</el-button>
+                        <el-button type="primary" @click="handleEdit()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<script src="../plugins/elementui/index.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data:{
+            pagination: {//分页相关模型数据
+                currentPage: 1,//当前页码
+                pageSize:10,//每页显示的记录数
+                total:0,//总记录数
+                queryString:null//查询条件
+            },
+            dataList: [],//当前页要展示的分页列表数据
+            formData: {},//表单数据
+            dialogFormVisible: false,//增加表单是否可见
+            dialogFormVisible4Edit:false,//编辑表单是否可见
+            rules: {//校验规则
+                code: [{ required: true, message: '项目编码为必填项', trigger: 'blur' }],
+                name: [{ required: true, message: '项目名称为必填项', trigger: 'blur' }]
+            }
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.findPage();
+        },
+        methods: {
+            //编辑
+            handleEdit() {
+                // alert("进入编辑功能-handleEdit()");
+                this.$refs['dataEditForm'].validate((valid) => {
+                    if(valid) {
+                        // 参考添加功能
+                        axios.post("/travelItem/edit.do",this.formData).then((response) => {
+                            // 关闭对话框
+                            this.dialogFormVisible4Edit = false
+                            if(response.data.flag) {
+                                //编辑成功，弹出成功提示信息
+                                this.$message({
+                                    type:"success",
+                                    message:response.data.message
+                                });
+                            } else {
+                                // 编译失败，弹出错误信息
+                                this.$message({
+                                    type:"error",
+                                    message:response.data.message
+                                })
+                            }
+                        }).finally(() => {
+                            // 自动刷新页面
+                            this.findPage()
+                        })
+                    } else {
+                        // 表单校验 - valid
+                        // 要在controller抛出这个异常才能生效
+                        // this.$message({
+                        //     type:"error",
+                        //     message:response.data.message
+                        // })
+
+                        this.$message.error("表单校验失败");
+                    }
+                })
+            },
+            //添加
+            handleAdd () {
+                // 表单校验
+                // 找到表单，引用set注入 value：普通对象 ref：对象引用
+                // 对表单进行规则 先添加校验规则[221-224]
+                // 判断校验结果并返回结果 valid
+                // 校验成功提交表单 ，校验失败则弹框提示
+                this.$refs['dataAddForm'].validate((valid) => {
+                    if (valid) {
+                        /**
+                         校验成功后通过AJAX将表单数据提交到后台的Constant
+                         请求参数：formData
+                         请求方式：post
+                         请求地址：/travelItem/add.do
+
+                         利用AJAX 发送 POST 请求
+                         格式 axios.post(请求地址,请求参数)
+                         then() 表示成功 成功后服务器会响应一个数据
+                         */
+                        axios.post("/travelItem/add.do",this.formData).then((response) => {
+                            // 点击 确定 按钮时需要关闭 弹窗
+                            // 默认为 false 当值为 true 则弹出
+                            this.dialogFormVisible = false
+                            // 静态网页测试时，不会关闭 因为此时服务器没有响应
+                            if(response.data.flag) {
+                                // 添加成功
+                                this.$message({
+                                    type:"success",
+                                    message:response.data.message
+                                });
+                            } else {
+                                // 添加失败
+                                this.$message({
+                                    type:"error",
+                                    message:response.data.message
+                                })
+                            }
+                        }).finally(() => {
+                            // 自动刷新页面
+                            this.findPage();
+                        })
+                    } else {
+                        // 校验失败 --- 利用elmentui 的 信息提示框
+                        // this.$message.error("校验失败：项目名称/项目编码不能为空")
+                        // 应该是写错了 - 295
+                        this.$message({
+                            type:"error",
+                            // message:"校验失败：项目名称/项目编码不能为空"
+                            message:response.data.message
+                        })
+                        this.$message.error("校验失败：项目名称/项目编码不能为空")
+
+                        return false;
+                    }
+                })
+            },
+            //分页查询
+            findPage() {
+                // 分页查询 -- 前端需要获取 页码、每页的记录数
+                // 查询条件 --- 项目编码/项目名称
+                var param = {
+                    currentPage:this.pagination.currentPage,     //页码
+                    pageSize:this.pagination.pageSize,           //每页记录数
+                    queryString:this.pagination.queryString      //查询条件
+                };
+
+                // 后端(TravelItemController)： 通过axios 传递 json 给 Controller
+                axios.post("/travelItem/findPage.do",param).then((response) => {
+                    // 需要返回 总记录数 与 从当前页面结果中获取行数
+                    this.dataList = response.data.rows;
+                    this.pagination.total = response.data.total;
+                });
+
+            },
+            // 重置表单 --- model="formData"
+            resetForm() {
+                this.formData = {};
+            },
+            // 弹出添加窗口 --- visible.sync="dialogFormVisible"
+            handleCreate() {
+                // 需要每次点击新建按钮时清空表单旧数据 --- 重置表单
+                this.resetForm()
+                // 默认为 false 当值为 true 则弹出
+                this.dialogFormVisible = true;
+            },
+            // 弹出编辑窗口
+            handleUpdate(row) {
+                alert(row.id);
+                //1 发送ajax请求根据id查询跟团游信息，用于基本信息回显
+                axios.get("/travelItem/findById.do?id=" + row.id).then((res)=>{
+                    if(res.data.flag){
+                        //设置编辑窗口属性，dialogFormVisible4Edit为true表示显示
+                        this.dialogFormVisible4Edit = true;
+                        //为模型数据设置值，基于VUE双向数据绑定回显到页面
+                        this.formData = res.data.data;
+                        // 修改信息
+                    }else{
+                        this.$message.error("获取数据失败，请刷新当前页面");
+                    }
+                });
+            },
+            //切换页码
+            handleCurrentChange(currentPage) {
+                // currentPage为切换后的页码
+                this.pagination.currentPage = currentPage;
+                this.findPage();
+            },
+            // 删除
+            handleDelete(row) {
+                alert("进入删除功能! 删除ID：" + row.id);
+                this.$confirm('此操作将永久删除该自由行, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    center: true
+                }).then(() => {
+                    // 发送ajax请求，执行删除
+                    axios.get("/travelItem/delete.do?id=" + row.id).then((response) => {
+                        if (response.data.falg) {
+                            this.$message({
+                                type: 'success',
+                                message: response.data.message
+                            });
+                            //调用分页，获取最新分页数据
+                            this.findPage();
+                        } else {
+                            // 删除出错 非用户主动取消
+                            // controller 中需要抛出异常来处理
+                            // this.$message({
+                            //     type: 'error',
+                            //     message: response.data.message
+                            // });
+                            this.$message.error(response.data.message);
+                        }
+                        //调用分页，获取最新分页数据
+                        this.findPage();
+                    })
+                }).catch(() => {
+                    // 用户主动取消
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            handleCancel() {
+                // alert("点击了")
+                // 编辑页面用户点击取消 弹出 提示并关闭编辑页面
+                this.dialogFormVisible4Edit = false;
+
+                this.$message({
+                    type:'info',
+                    message:"用户已取消编辑"
+                })
+
+                //调用分页，获取最新分页数据
+                this.findPage();
+            }
+        }
+    })
+</script>
+</html>

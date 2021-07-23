@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.OrdersettingDao">
+
+    <!--  =========================================================================================  -->
+
+    <!-- 查询 数据库 回显预约信息 -->
+    <!-- List<OrderSetting> getOrderSettingByMonth(Map map); -->
+    <!-- 查询方案：SELECT * FROM t_ordersetting WHERE orderDate BETWEEN '2019-9-1' AND '2019-9-31' -->
+    <select id="getOrderSettingByMonth" parameterType="map" resultType="orderSetting">
+        SELECT * FROM t_ordersetting
+        WHERE orderDate
+        BETWEEN #{dateBegin} AND #{dateEnd}
+    </select>
+
+    <!--  =========================================================================================  -->
+
+    <!--根据预约日期查询-->
+    <select id="findCountByOrderDate" parameterType="java.util.Date" resultType="long">
+        select count(*)
+        from t_ordersetting
+        where orderDate = #{orderDate}
+    </select>
+
+    <!--新增-->
+    <insert id="add" parameterType="ordersetting">
+        insert into t_ordersetting (orderDate,number,reservations)
+        values (#{orderDate},#{number},#{reservations})
+    </insert>
+
+    <!--根据日期更新预约人数-->
+    <update id="editNumberByOrderDate" parameterType="orderSetting">
+        update t_ordersetting
+        set number =#{number}
+        where orderDate =#{orderDate}
+    </update>
+
+    <!--  =========================================================================================  -->
+
+    <!-- 根据日期查询当天是否开团 -->
+    <!-- OrderSetting findByOrderDate(Date date); -->
+    <select id="findByOrderDate" parameterType="date" resultType="orderSetting">
+        select *
+        from t_ordersetting
+        where orderDate =#{orderDate}
+    </select>
+
+    <!-- 根据参团日期 更新已预约人数 -->
+    <!-- void edittReservationsByOrderData(OrderSetting orderSetting); -->
+    <update id="edittReservationsByOrderData" parameterType="orderSetting" >
+        update t_ordersetting
+        set reservations =#{reservations}
+        where orderDate =#{orderDate}
+    </update>
+
+</mapper>

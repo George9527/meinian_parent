@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.dao.TravelItemDao">
+
+    <!--根据跟团游id查询自由行信息-->
+    <!-- 在 TravelItem 中 根据ID查询TravelItem集合 -->
+    <!-- List<TravelItem> findTravelItemListById(Integer id); -->
+    <select id="findTravelItemListById" parameterType="int" resultType="travelItem">
+        select * from t_travelitem where id in (
+            select travelitem_id from t_travelgroup_travelitem where travelgroup_id =#{id}
+            )
+    </select>
+
+
+
+    <!--往数据库里面插入数据-->
+    <!-- ("/travelItem/add.do")-->
+    <insert id="add" parameterType="travelItem">
+        insert into t_travelitem(code, name, sex, age, price, type, remark, attention)
+        values (#{code}, #{name}, #{sex}, #{age}, #{price}, #{type}, #{remark}, #{attention})
+    </insert>
+    
+    <!--
+        分页功能 根据条件查询
+        需要判断当前值是否不为空且不为0
+    -->
+    <!-- "/travelItem/findPage.do"-->
+    <select id="findPage" parameterType="string" resultType="travelItem">
+        select *
+        from t_travelitem
+        <where>
+            <if test="value!=null and value.length>0">
+            name like "%"#{value}"%" or code=#{value}
+            </if>
+        </where>
+    </select>
+
+    <!-- /travelItem/findById -->
+    <!-- 根据 id 进行查询 -->
+    <select id="findById" parameterType="Integer" resultType="travelItem">
+        select *
+        from t_travelitem
+        where id=#{id}
+    </select>
+
+    <!-- "/travelItem/edit.do"-->
+    <!--更新数据-->
+    <update id="edit" parameterType="travelItem">
+        update t_travelitem
+        <set>
+            <if test="code!=null and code.length>0">
+                code=#{code},
+            </if>
+            <if test="name!=null and name.length>0">
+                name=#{name},
+            </if>
+            <if test="sex!=null and sex.length>0">
+                sex=#{sex},
+            </if>
+            <if test="age!=null and age.length>0">
+                age=#{age},
+            </if>
+            <if test="price!=null">
+                price=#{price},
+            </if>
+            <if test="type!=null and type.length>0">
+                type=#{type},
+            </if>
+            <if test="remark!=null and remark.length>0">
+                remark=#{remark},
+            </if>
+            <if test="attention!=null and attention.length>0">
+                attention=#{attention},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+<!--    &lt;!&ndash; 删除功能 &ndash;&gt;-->
+<!--    &lt;!&ndash; travelItemDao.deleteById(id); &ndash;&gt;-->
+<!--    <delete id="deleteById" parameterType="Integer">-->
+<!--        delete from t_travelitem-->
+<!--        where id=#{id}-->
+<!--    </delete>-->
+
+    <!--根据自由行id查询中间关系表-->
+    <select id="findCountByTravelItemItemId" parameterType="int" resultType="long">
+        select count(*) from t_travelgroup_travelitem where travelitem_id =#{id}
+    </select>
+    <!--删除-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_travelitem where id=#{id}
+    </delete>
+
+    <!-- List<TravelItem> findAll(); -->
+    <!-- ("/travelItem/findAll.do") -->
+    <select id="findAll" resultType="travelItem">
+        select * from t_travelitem
+    </select>
+
+</mapper>
+
+
